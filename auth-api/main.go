@@ -8,8 +8,8 @@ import (
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	gommonlog "github.com/labstack/gommon/log"
 )
 
@@ -32,15 +32,13 @@ func main() {
 		jwtSecret = envJwtSecret
 	}
 
-	userService := UserService{
-		Client:         http.DefaultClient,
-		UserAPIAddress: userAPIAddress,
-		AllowedUserHashes: map[string]interface{}{
-			"admin_admin": nil,
-			"johnd_foo":   nil,
-			"janed_ddd":   nil,
-		},
+	// Crear cliente HTTP con timeout
+	httpClient := &http.Client{
+		Timeout: 10 * time.Second,
 	}
+
+	// Crear UserService con Circuit Breaker
+	userService := NewUserService(httpClient, userAPIAddress)
 
 	e := echo.New()
 	e.Logger.SetLevel(gommonlog.INFO)
@@ -62,7 +60,15 @@ func main() {
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
 
-	// Route => handler
+	// Health check endpoint
+	e.GET("/health", func(c echo.Context) error {
+		return c.JSON(http.StatusOK, map[string]string{
+			"status": "healthy",
+			"service": "auth-api",
+		})
+	})
+
+	// Version endpoint
 	e.GET("/version", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Auth API, written in Go\n")
 	})
@@ -78,7 +84,7 @@ type LoginRequest struct {
 	Password string `json:"password"`
 }
 
-func getLoginHandler(userService UserService) echo.HandlerFunc {
+func getLoginHandler(userService *UserService) echo.HandlerFunc {
 	f := func(c echo.Context) error {
 		requestData := LoginRequest{}
 		decoder := json.NewDecoder(c.Request().Body)
