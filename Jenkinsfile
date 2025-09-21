@@ -2,7 +2,7 @@ pipeline {
     agent any
     
     environment {
-        DOCKER_REGISTRY = 'andrewdpg'  // Cambiar por tu usuario de Docker Hub
+        DOCKER_REGISTRY = 'andrewdpg'  // Cambia por tu username de Docker Hub
         IMAGE_TAG = "${env.BUILD_NUMBER}"
         KUBECONFIG = '/var/jenkins_home/.kube/config'
     }
@@ -14,13 +14,18 @@ pipeline {
             }
         }
         
-        stage('Build and Test') {
+        stage('Build and Push Images') {
             parallel {
                 stage('Auth API') {
                     steps {
                         dir('auth-api') {
-                            sh 'docker build -t ${DOCKER_REGISTRY}/auth-api:${IMAGE_TAG} .'
-                            sh 'docker build -t ${DOCKER_REGISTRY}/auth-api:latest .'
+                            script {
+                                docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
+                                    def image = docker.build("${DOCKER_REGISTRY}/auth-api:${IMAGE_TAG}")
+                                    image.push()
+                                    image.push("latest")
+                                }
+                            }
                         }
                     }
                 }
@@ -28,8 +33,13 @@ pipeline {
                 stage('Users API') {
                     steps {
                         dir('users-api') {
-                            sh 'docker build -t ${DOCKER_REGISTRY}/users-api:${IMAGE_TAG} .'
-                            sh 'docker build -t ${DOCKER_REGISTRY}/users-api:latest .'
+                            script {
+                                docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
+                                    def image = docker.build("${DOCKER_REGISTRY}/users-api:${IMAGE_TAG}")
+                                    image.push()
+                                    image.push("latest")
+                                }
+                            }
                         }
                     }
                 }
@@ -37,8 +47,13 @@ pipeline {
                 stage('TODOs API') {
                     steps {
                         dir('todos-api') {
-                            sh 'docker build -t ${DOCKER_REGISTRY}/todos-api:${IMAGE_TAG} .'
-                            sh 'docker build -t ${DOCKER_REGISTRY}/todos-api:latest .'
+                            script {
+                                docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
+                                    def image = docker.build("${DOCKER_REGISTRY}/todos-api:${IMAGE_TAG}")
+                                    image.push()
+                                    image.push("latest")
+                                }
+                            }
                         }
                     }
                 }
@@ -46,8 +61,13 @@ pipeline {
                 stage('Log Processor') {
                     steps {
                         dir('log-message-processor') {
-                            sh 'docker build -t ${DOCKER_REGISTRY}/log-processor:${IMAGE_TAG} .'
-                            sh 'docker build -t ${DOCKER_REGISTRY}/log-processor:latest .'
+                            script {
+                                docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
+                                    def image = docker.build("${DOCKER_REGISTRY}/log-processor:${IMAGE_TAG}")
+                                    image.push()
+                                    image.push("latest")
+                                }
+                            }
                         }
                     }
                 }
@@ -55,30 +75,29 @@ pipeline {
                 stage('Frontend') {
                     steps {
                         dir('frontend') {
-                            sh 'docker build -t ${DOCKER_REGISTRY}/frontend:${IMAGE_TAG} .'
-                            sh 'docker build -t ${DOCKER_REGISTRY}/frontend:latest .'
+                            script {
+                                docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
+                                    def image = docker.build("${DOCKER_REGISTRY}/frontend:${IMAGE_TAG}")
+                                    image.push()
+                                    image.push("latest")
+                                }
+                            }
                         }
                     }
                 }
             }
         }
         
-        stage('Push Images') {
+        stage('Update Manifests') {
             steps {
-                script {
-                    def images = [
-                        'auth-api',
-                        'users-api', 
-                        'todos-api',
-                        'log-processor',
-                        'frontend'
-                    ]
-                    
-                    images.each { image ->
-                        sh "docker push ${DOCKER_REGISTRY}/${image}:${IMAGE_TAG}"
-                        sh "docker push ${DOCKER_REGISTRY}/${image}:latest"
-                    }
-                }
+                sh '''
+                    # Actualizar manifiestos con el username correcto
+                    sed -i "s/your-dockerhub-username/${DOCKER_REGISTRY}/g" infra/k8s/staging/auth-api-deployment.yaml
+                    sed -i "s/your-dockerhub-username/${DOCKER_REGISTRY}/g" infra/k8s/staging/users-api-deployment.yaml
+                    sed -i "s/your-dockerhub-username/${DOCKER_REGISTRY}/g" infra/k8s/staging/todos-api-deployment.yaml
+                    sed -i "s/your-dockerhub-username/${DOCKER_REGISTRY}/g" infra/k8s/staging/log-processor-deployment.yaml
+                    sed -i "s/your-dockerhub-username/${DOCKER_REGISTRY}/g" infra/k8s/staging/frontend-deployment.yaml
+                '''
             }
         }
         
@@ -87,27 +106,36 @@ pipeline {
                 branch 'main'
             }
             steps {
-                sh 'kubectl apply -f infra/k8s/staging/'
-                sh 'kubectl rollout status deployment/auth-api -n microservices-staging'
-                sh 'kubectl rollout status deployment/users-api -n microservices-staging'
-                sh 'kubectl rollout status deployment/todos-api -n microservices-staging'
-                sh 'kubectl rollout status deployment/log-processor -n microservices-staging'
-                sh 'kubectl rollout status deployment/frontend -n microservices-staging'
+                sh '''
+                    kubectl apply -f infra/k8s/staging/namespace.yaml
+                    kubectl apply -f infra/k8s/staging/secrets.yaml
+                    kubectl apply -f infra/k8s/staging/redis-queue-deployment.yaml
+                    kubectl apply -f infra/k8s/staging/redis-queue-service.yaml
+                    kubectl apply -f infra/k8s/staging/redis-cache-deployment.yaml
+                    kubectl apply -f infra/k8s/staging/redis-cache-service.yaml
+                    kubectl apply -f infra/k8s/staging/auth-api-deployment.yaml
+                    kubectl apply -f infra/k8s/staging/auth-api-service.yaml
+                    kubectl apply -f infra/k8s/staging/users-api-deployment.yaml
+                    kubectl apply -f infra/k8s/staging/users-api-service.yaml
+                    kubectl apply -f infra/k8s/staging/todos-api-deployment.yaml
+                    kubectl apply -f infra/k8s/staging/todos-api-service.yaml
+                    kubectl apply -f infra/k8s/staging/log-processor-deployment.yaml
+                    kubectl apply -f infra/k8s/staging/frontend-deployment.yaml
+                    kubectl apply -f infra/k8s/staging/frontend-service.yaml
+                    kubectl apply -f infra/k8s/staging/hpa-todos-api.yaml
+                    kubectl apply -f infra/k8s/staging/keda-scaler.yaml
+                    kubectl apply -f infra/k8s/staging/ingress.yaml
+                '''
             }
         }
         
-        stage('Deploy to Production') {
-            when {
-                tag pattern: "v\\d+\\.\\d+\\.\\d+", comparator: "REGEXP"
-            }
+        stage('Verify Deployment') {
             steps {
-                input message: 'Deploy to Production?', ok: 'Deploy'
-                sh 'kubectl apply -f infra/k8s/prod/'
-                sh 'kubectl rollout status deployment/auth-api -n microservices-prod'
-                sh 'kubectl rollout status deployment/users-api -n microservices-prod'
-                sh 'kubectl rollout status deployment/todos-api -n microservices-prod'
-                sh 'kubectl rollout status deployment/log-processor -n microservices-prod'
-                sh 'kubectl rollout status deployment/frontend -n microservices-prod'
+                sh '''
+                    kubectl get pods -n microservices-staging
+                    kubectl get services -n microservices-staging
+                    kubectl get ingress -n microservices-staging
+                '''
             }
         }
     }
