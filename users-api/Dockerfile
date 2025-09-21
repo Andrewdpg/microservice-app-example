@@ -21,6 +21,8 @@ EXPOSE 8083
 
 # Variables de entorno por defecto
 ENV SERVER_PORT=8083
+ENV REDIS_HOST=redis-cache
+ENV REDIS_PORT=6379
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \

@@ -26,6 +26,17 @@ services:
     networks:
       - microservices
 
+  # Redis para caché
+  redis-cache:
+    image: redis:7-alpine
+    container_name: redis-cache
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_cache_data:/data
+    networks:
+      - microservices
+
   # Auth API
   auth-api:
     build: ./auth-api
@@ -106,6 +117,7 @@ services:
 volumes:
   jenkins_home:
   redis_queue_data:
+  redis_cache_data:
 
 networks:
   microservices:
