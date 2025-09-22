@@ -1,155 +1,128 @@
 pipeline {
-    agent any
-    
-    environment {
-        DOCKER_REGISTRY = 'andrewdpg'
-        IMAGE_TAG = "${env.BUILD_NUMBER}"
-        KUBECONFIG = '/var/jenkins_home/.kube/config'
+  agent any
+
+  environment {
+    REGISTRY = 'docker.io/andrewdpg'
+    DOCKERHUB = 'dockerhub-creds'
+    K8S_NAMESPACE = 'micro'
+    IMAGE_TAG = "${env.BRANCH_NAME}-${env.GIT_COMMIT.take(7)}"
+  }
+
+  options {
+    skipDefaultCheckout()
+    timestamps()
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+        sh 'git rev-parse --short HEAD | cat'
+      }
     }
-    
-    stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
+
+    stage('Build & Test') {
+      parallel {
+        stage('todos-api (Node)') {
+          agent { docker { image 'node:18-alpine' } }
+          steps {
+            dir('todos-api') {
+              sh 'npm ci'
+              sh 'npm test --silent || echo "no tests"'
             }
+          }
         }
-        
-        stage('Build and Push Images') {
-            parallel {
-                stage('Auth API') {
-                    steps {
-                        dir('auth-api') {
-                            script {
-                                // Usar el plugin de Docker en lugar de withDockerRegistry
-                                def image = docker.build("${DOCKER_REGISTRY}/auth-api:${IMAGE_TAG}")
-                                docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-                                    image.push()
-                                    image.push("latest")
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                stage('Users API') {
-                    steps {
-                        dir('users-api') {
-                            script {
-                                def image = docker.build("${DOCKER_REGISTRY}/users-api:${IMAGE_TAG}")
-                                docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-                                    image.push()
-                                    image.push("latest")
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                stage('TODOs API') {
-                    steps {
-                        dir('todos-api') {
-                            script {
-                                def image = docker.build("${DOCKER_REGISTRY}/todos-api:${IMAGE_TAG}")
-                                docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-                                    image.push()
-                                    image.push("latest")
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                stage('Log Processor') {
-                    steps {
-                        dir('log-message-processor') {
-                            script {
-                                def image = docker.build("${DOCKER_REGISTRY}/log-processor:${IMAGE_TAG}")
-                                docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-                                    image.push()
-                                    image.push("latest")
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                stage('Frontend') {
-                    steps {
-                        dir('frontend') {
-                            script {
-                                def image = docker.build("${DOCKER_REGISTRY}/frontend:${IMAGE_TAG}")
-                                docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-                                    image.push()
-                                    image.push("latest")
-                                }
-                            }
-                        }
-                    }
-                }
+        stage('frontend (Vue)') {
+          agent { docker { image 'node:18-alpine' } }
+          steps {
+            dir('frontend') {
+              sh 'npm ci'
+              sh 'npm run build'
             }
+          }
         }
-        
-        stage('Update Manifests') {
-            steps {
-                sh '''
-                    # Actualizar manifiestos con el username correcto
-                    sed -i "s/your-dockerhub-username/${DOCKER_REGISTRY}/g" infra/k8s/staging/auth-api-deployment.yaml
-                    sed -i "s/your-dockerhub-username/${DOCKER_REGISTRY}/g" infra/k8s/staging/users-api-deployment.yaml
-                    sed -i "s/your-dockerhub-username/${DOCKER_REGISTRY}/g" infra/k8s/staging/todos-api-deployment.yaml
-                    sed -i "s/your-dockerhub-username/${DOCKER_REGISTRY}/g" infra/k8s/staging/log-processor-deployment.yaml
-                    sed -i "s/your-dockerhub-username/${DOCKER_REGISTRY}/g" infra/k8s/staging/frontend-deployment.yaml
-                '''
+        stage('users-api (Java)') {
+          agent { docker { image 'maven:3.9-eclipse-temurin-17' } }
+          steps {
+            dir('users-api') {
+              sh 'mvn -B -DskipTests package'
             }
+          }
         }
-        
-        stage('Deploy to Staging') {
-            when {
-                branch 'main'
+        stage('auth-api (Go)') {
+          agent { docker { image 'golang:1.22-alpine' } }
+          steps {
+            dir('auth-api') {
+              sh 'go mod download'
+              sh 'go build ./...'
             }
-            steps {
-                sh '''
-                    kubectl apply -f infra/k8s/staging/namespace.yaml
-                    kubectl apply -f infra/k8s/staging/secrets.yaml
-                    kubectl apply -f infra/k8s/staging/redis-queue-deployment.yaml
-                    kubectl apply -f infra/k8s/staging/redis-queue-service.yaml
-                    kubectl apply -f infra/k8s/staging/redis-cache-deployment.yaml
-                    kubectl apply -f infra/k8s/staging/redis-cache-service.yaml
-                    kubectl apply -f infra/k8s/staging/auth-api-deployment.yaml
-                    kubectl apply -f infra/k8s/staging/auth-api-service.yaml
-                    kubectl apply -f infra/k8s/staging/users-api-deployment.yaml
-                    kubectl apply -f infra/k8s/staging/users-api-service.yaml
-                    kubectl apply -f infra/k8s/staging/todos-api-deployment.yaml
-                    kubectl apply -f infra/k8s/staging/todos-api-service.yaml
-                    kubectl apply -f infra/k8s/staging/log-processor-deployment.yaml
-                    kubectl apply -f infra/k8s/staging/frontend-deployment.yaml
-                    kubectl apply -f infra/k8s/staging/frontend-service.yaml
-                    kubectl apply -f infra/k8s/staging/hpa-todos-api.yaml
-                    kubectl apply -f infra/k8s/staging/keda-scaler.yaml
-                    kubectl apply -f infra/k8s/staging/ingress.yaml
-                '''
-            }
+          }
         }
-        
-        stage('Verify Deployment') {
-            steps {
-                sh '''
-                    kubectl get pods -n microservices-staging
-                    kubectl get services -n microservices-staging
-                    kubectl get ingress -n microservices-staging
-                '''
+        stage('log-message-processor (Py)') {
+          agent { docker { image 'python:3.11-alpine' } }
+          steps {
+            dir('log-message-processor') {
+              sh 'pip install -r requirements.txt || true'
             }
+          }
         }
+      }
     }
-    
-    post {
-        always {
-            sh 'docker system prune -f || true'  # Agregar || true para evitar fallo
+
+    stage('Docker Build') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: "${DOCKERHUB}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+          sh '''
+            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+            docker build -t ${REGISTRY}/todos-api:${IMAGE_TAG} ./todos-api
+            docker build -t ${REGISTRY}/frontend:${IMAGE_TAG} ./frontend
+            docker build -t ${REGISTRY}/users-api:${IMAGE_TAG} ./users-api
+            docker build -t ${REGISTRY}/auth-api:${IMAGE_TAG} ./auth-api
+            docker build -t ${REGISTRY}/log-message-processor:${IMAGE_TAG} ./log-message-processor
+          '''
         }
-        success {
-            echo 'Pipeline executed successfully!'
-        }
-        failure {
-            echo 'Pipeline failed!'
-        }
+      }
     }
+
+    stage('Docker Push') {
+      steps {
+        sh '''
+          docker push ${REGISTRY}/todos-api:${IMAGE_TAG}
+          docker push ${REGISTRY}/frontend:${IMAGE_TAG}
+          docker push ${REGISTRY}/users-api:${IMAGE_TAG}
+          docker push ${REGISTRY}/auth-api:${IMAGE_TAG}
+          docker push ${REGISTRY}/log-message-processor:${IMAGE_TAG}
+        '''
+      }
+    }
+
+    stage('Deploy to K8s') {
+      when {
+        anyOf { branch 'main'; branch 'master' }
+      }
+      steps {
+        withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')]) {
+          sh '''
+            export KUBECONFIG="$KUBECONFIG_FILE"
+            mkdir -p infra/k8s/_render
+            export REGISTRY=${REGISTRY}
+            export IMAGE_TAG=${IMAGE_TAG}
+            find infra/k8s -type f -name "*.yaml" ! -path "*/_render/*" -print0 | while IFS= read -r -d '' f; do
+              envsubst < "$f" > "infra/k8s/_render/$(basename $f)"
+            done
+            kubectl apply -f infra/k8s/_render --recursive
+          '''
+        }
+      }
+    }
+  }
+
+  post {
+    always {
+      sh 'docker logout || true'
+    }
+  }
 }
+
+
+
