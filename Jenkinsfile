@@ -5,7 +5,6 @@ pipeline {
     REGISTRY = 'docker.io/andrewdpg'
     DOCKERHUB = 'dockerhub-creds'
     K8S_NAMESPACE = 'micro'
-    IMAGE_TAG = "${env.BRANCH_NAME}-${env.GIT_COMMIT.take(7)}"
   }
 
   options {
@@ -17,7 +16,11 @@ pipeline {
     stage('Checkout') {
       steps {
         checkout scm
-        sh 'git rev-parse --short HEAD | cat'
+        script {
+          def shortSha = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+          env.IMAGE_TAG = "${env.BRANCH_NAME}-${shortSha}"
+          echo "IMAGE_TAG=${env.IMAGE_TAG}"
+        }
       }
     }
 
@@ -117,11 +120,7 @@ pipeline {
     }
   }
 
-  post {
-    always {
-      sh 'docker logout || true'
-    }
-  }
+  post { }
 }
 
 
