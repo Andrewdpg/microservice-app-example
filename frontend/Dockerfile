@@ -27,8 +27,9 @@ COPY nginx.conf /etc/nginx/nginx.conf
 EXPOSE 8080
 
 # Variables de entorno por defecto
-ENV AUTH_API_URL=http://auth-api:8081
-ENV TODOS_API_URL=http://todos-api:8082
+ENV AUTH_API_ADDRESS=http://auth-api:8081
+ENV TODOS_API_ADDRESS=http://todos-api:8082
+ENV ZIPKIN_URL=http://zipkin:9411/api/v2/spans
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \

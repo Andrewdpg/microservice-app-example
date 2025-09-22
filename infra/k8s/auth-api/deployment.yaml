@@ -17,20 +17,20 @@ spec:
         - name: auth-api
           image: ${REGISTRY}/auth-api:${IMAGE_TAG}
           ports:
-            - containerPort: 8000
+            - containerPort: 8081
           env:
             - name: AUTH_API_PORT
-              value: "8000"
+              valueFrom:
+                configMapKeyRef: { name: micro-config, key: AUTH_API_PORT }
             - name: USERS_API_ADDRESS
               valueFrom:
-                configMapKeyRef:
-                  name: micro-config
-                  key: USERS_API_ADDRESS
+                configMapKeyRef: { name: micro-config, key: USERS_API_URL }
             - name: JWT_SECRET
               valueFrom:
-                configMapKeyRef:
-                  name: micro-config
-                  key: JWT_SECRET
+                secretKeyRef: { name: micro-secrets, key: JWT_SECRET }
+            - name: ZIPKIN_URL
+              valueFrom:
+                configMapKeyRef: { name: micro-config, key: ZIPKIN_URL }
           resources:
             requests:
               cpu: "100m"

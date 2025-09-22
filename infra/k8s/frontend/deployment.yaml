@@ -17,12 +17,15 @@ spec:
         ports:
         - containerPort: 80
         env:
-        - name: AUTH_API_URL
+        - name: AUTH_API_ADDRESS
           valueFrom:
             configMapKeyRef: { name: micro-config, key: AUTH_API_URL }
-        - name: TODOS_API_URL
+        - name: TODOS_API_ADDRESS
           valueFrom:
             configMapKeyRef: { name: micro-config, key: TODOS_API_URL }
+        - name: ZIPKIN_URL
+          valueFrom:
+            configMapKeyRef: { name: micro-config, key: ZIPKIN_URL }
         resources:
           requests:
             cpu: "50m"

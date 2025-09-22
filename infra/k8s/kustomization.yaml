@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
   - namespaces.yaml
   - config/configmap.yaml
+  - config/secret.yaml
   - redis/queue-deployment.yaml
   - redis/cache-deployment.yaml
   - todos-api/deployment.yaml

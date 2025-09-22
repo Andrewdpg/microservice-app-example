@@ -17,14 +17,14 @@ spec:
         - name: todos-api
           image: ${REGISTRY}/todos-api:${IMAGE_TAG}
           ports:
-            - containerPort: 3000
+            - containerPort: 8082
           env:
             - name: TODO_API_PORT
               valueFrom:
                 configMapKeyRef: { name: micro-config, key: TODOS_API_PORT }
             - name: USERS_API_ADDRESS
               valueFrom:
-                configMapKeyRef: { name: micro-config, key: USERS_API_ADDRESS }
+                configMapKeyRef: { name: micro-config, key: USERS_API_URL }
             - name: ZIPKIN_URL
               valueFrom:
                 configMapKeyRef: { name: micro-config, key: ZIPKIN_URL }
@@ -36,10 +36,10 @@ spec:
                 configMapKeyRef: { name: micro-config, key: REDIS_QUEUE_PORT }
             - name: REDIS_CHANNEL
               valueFrom:
-                configMapKeyRef: { name: micro-config, key: REDIS_CHANNEL }
+                configMapKeyRef: { name: micro-config, key: REDIS_QUEUE_CHANNEL }
             - name: JWT_SECRET
               valueFrom:
-                configMapKeyRef: { name: micro-config, key: JWT_SECRET }
+                secretKeyRef: { name: micro-secrets, key: JWT_SECRET }
           resources:
             requests:
               cpu: "100m"

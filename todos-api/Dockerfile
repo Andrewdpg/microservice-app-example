@@ -30,6 +30,7 @@ ENV REDIS_HOST=redis-queue
 ENV REDIS_PORT=6379
 ENV REDIS_CHANNEL=log_channel
 ENV USERS_API_ADDRESS=http://users-api:8083
+ENV ZIPKIN_URL=http://zipkin:9411/api/v2/spans
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \

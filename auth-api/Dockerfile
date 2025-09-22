@@ -30,6 +30,7 @@ EXPOSE 8081
 ENV AUTH_API_PORT=8081
 ENV JWT_SECRET=myfancysecret
 ENV USERS_API_ADDRESS=http://users-api:8083
+ENV ZIPKIN_URL=http://zipkin:9411/api/v2/spans
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
