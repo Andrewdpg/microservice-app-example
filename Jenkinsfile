@@ -50,17 +50,19 @@ pipeline {
             rm -rf infra/k8s/_render && mkdir -p infra/k8s/_render
             cp infra/k8s/namespaces.yaml infra/k8s/_render/
 
+            # Renderiza todos los YAMLs preservando rutas; excluye kustomization y RBAC
             find infra/k8s -type f -name "*.yaml" \
               ! -path "*/_render/*" \
               ! -name "kustomization.yaml" \
-              ! -name "rbac-jenkins.yaml" -print0 | while IFS= read -r -d '' f; do
+              ! -name "rbac-jenkins.yaml" \
+              -print | while read -r f; do
                 out="infra/k8s/_render/${f#infra/k8s/}"
                 mkdir -p "$(dirname "$out")"
-                # Si tu imagen kubectl no tiene envsubst, usa sed:
-                sed -e "s|\\${REGISTRY}|${REGISTRY}|g" -e "s|\\${IMAGE_TAG}|${IMAGE_TAG}|g" "$f" > "$out"
-                # Alternativa (si hay envsubst): envsubst < "$f" > "$out"
+                sed -e "s|\\${REGISTRY}|${REGISTRY}|g" \
+                    -e "s|\\${IMAGE_TAG}|${IMAGE_TAG}|g" "$f" > "$out"
             done
 
+            echo "Rendered files:"; find infra/k8s/_render -type f -maxdepth 3 -print
             kubectl --kubeconfig "$KCFG" apply -f infra/k8s/namespaces.yaml --validate=false
             kubectl --kubeconfig "$KCFG" apply -f infra/k8s/_render -R --validate=false
           '''
