@@ -4,7 +4,7 @@ metadata:
   name: users-api
   namespace: micro
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels: { app: users-api }
   template:
@@ -49,5 +49,5 @@ spec:
           valueFrom:
             configMapKeyRef: { name: micro-config, key: DATABASE_PASSWORD }
         resources:
-          requests: { cpu: "100m", memory: "512Mi" }
-          limits:   { cpu: "400m", memory: "1024Mi" }
+          requests: { cpu: "100m", memory: "1Gi" }
+          limits:   { cpu: "400m", memory: "2Gi" }
