@@ -17,6 +17,9 @@ spec:
         ports:
         - containerPort: 8083
         env:
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef: { name: micro-secrets, key: JWT_SECRET }
         - name: SERVER_PORT
           valueFrom:
             configMapKeyRef: { name: micro-config, key: USERS_API_PORT }
