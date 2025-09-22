@@ -124,7 +124,7 @@ pipeline {
         }
       }
       steps {
-        withCredentials([file(credentialsId: 'jenkins-kubeconfig', variable: 'KCFG')]) {
+        withCredentials([file(credentialsId: 'kubeconfig', variable: 'KCFG')]) {
           sh '''
             set -e
             # 1) Descubre el puerto del API de kind en el host
