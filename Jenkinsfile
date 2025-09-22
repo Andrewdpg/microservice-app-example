@@ -3,7 +3,7 @@ pipeline {
 
   environment {
     REGISTRY = 'docker.io/andrewdpg'
-    DOCKERHUB = 'dockerhub-creds'
+    DOCKERHUB = 'docker-hub-credentials'
     K8S_NAMESPACE = 'micro'
   }
 
