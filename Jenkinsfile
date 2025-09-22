@@ -18,9 +18,17 @@ pipeline {
         checkout scm
         script {
           def shortSha = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
-          env.IMAGE_TAG = "${env.BRANCH_NAME}-${shortSha}"
+          def branchName = env.BRANCH_NAME
+          if (!branchName || branchName.trim() == '') {
+            branchName = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
+          }
+          if (!branchName || branchName == 'HEAD') {
+            branchName = 'master'
+          }
+          env.IMAGE_TAG = "${branchName}-${shortSha}"
           echo "IMAGE_TAG=${env.IMAGE_TAG}"
         }
+        stash name: 'ws', includes: '**/*'
       }
     }
 
@@ -29,6 +37,7 @@ pipeline {
         stage('todos-api (Node)') {
           agent { docker { image 'node:18-alpine' } }
           steps {
+            unstash 'ws'
             dir('todos-api') {
               sh 'npm ci'
               sh 'npm test --silent || echo "no tests"'
@@ -38,6 +47,7 @@ pipeline {
         stage('frontend (Vue)') {
           agent { docker { image 'node:18-alpine' } }
           steps {
+            unstash 'ws'
             dir('frontend') {
               sh 'npm ci'
               sh 'npm run build'
@@ -47,6 +57,7 @@ pipeline {
         stage('users-api (Java)') {
           agent { docker { image 'maven:3.9-eclipse-temurin-17' } }
           steps {
+            unstash 'ws'
             dir('users-api') {
               sh 'mvn -B -DskipTests package'
             }
@@ -55,6 +66,7 @@ pipeline {
         stage('auth-api (Go)') {
           agent { docker { image 'golang:1.22-alpine' } }
           steps {
+            unstash 'ws'
             dir('auth-api') {
               sh 'go mod download'
               sh 'go build ./...'
@@ -64,6 +76,7 @@ pipeline {
         stage('log-message-processor (Py)') {
           agent { docker { image 'python:3.11-alpine' } }
           steps {
+            unstash 'ws'
             dir('log-message-processor') {
               sh 'pip install -r requirements.txt || true'
             }
@@ -74,6 +87,7 @@ pipeline {
 
     stage('Docker Build') {
       steps {
+        unstash 'ws'
         withCredentials([usernamePassword(credentialsId: "${DOCKERHUB}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
           sh '''
             echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
@@ -89,6 +103,7 @@ pipeline {
 
     stage('Docker Push') {
       steps {
+        unstash 'ws'
         sh '''
           docker push ${REGISTRY}/todos-api:${IMAGE_TAG}
           docker push ${REGISTRY}/frontend:${IMAGE_TAG}
