@@ -17,6 +17,10 @@ spec:
         ports:
         - containerPort: 8083
         env:
+        - name: JAVA_OPTS
+          value: "-Xms256m -Xmx512m -XX:+UseG1GC -XX:+UseContainerSupport"
+        - name: SPRING_PROFILES_ACTIVE
+          value: "production"
         - name: JWT_SECRET
           valueFrom:
             secretKeyRef: { name: micro-secrets, key: JWT_SECRET }
@@ -45,5 +49,5 @@ spec:
           valueFrom:
             configMapKeyRef: { name: micro-config, key: DATABASE_PASSWORD }
         resources:
-          requests: { cpu: "100m", memory: "256Mi" }
-          limits:   { cpu: "400m", memory: "512Mi" }
+          requests: { cpu: "100m", memory: "512Mi" }
+          limits:   { cpu: "400m", memory: "1024Mi" }
