@@ -37,27 +37,24 @@ pipeline {
       agent {
         docker {
           image 'bitnami/kubectl:1.29'
-          args '--entrypoint="" --network kind -u 0:0' // red kind ⇒ resuelve ci-control-plane
+          args '--entrypoint="" --network kind -u 0:0'
         }
       }
       steps {
         withCredentials([file(credentialsId: 'kubeconfig', variable: 'KCFG')]) {
           sh '''
             set -e
-    
-            # Render
             rm -rf infra/k8s/_render && mkdir -p infra/k8s/_render
             cp infra/k8s/namespaces.yaml infra/k8s/_render/
             find infra/k8s -type f -name "*.yaml" ! -path "*/_render/*" ! -name "kustomization.yaml" | while read f; do
               name=$(basename "$f")
               sed -e "s|\\${REGISTRY}|${REGISTRY}|g" -e "s|\\${IMAGE_TAG}|${IMAGE_TAG}|g" "$f" > "infra/k8s/_render/$name"
             done
-    
             echo "Rendered files:"; ls -la infra/k8s/_render
-    
-            # Aplica usando el kubeconfig que ya apunta a https://ci-control-plane:6443
-            kubectl --kubeconfig jenkins-kubeconfig.yaml apply -f infra/k8s/namespaces.yaml --validate=false
-            kubectl --kubeconfig jenkins-kubeconfig.yaml apply -f infra/k8s/_render -R --validate=false
+
+            # Usa el kubeconfig de la credencial (variable $KCFG)
+            kubectl --kubeconfig "$KCFG" apply -f infra/k8s/namespaces.yaml --validate=false
+            kubectl --kubeconfig "$KCFG" apply -f infra/k8s/_render -R --validate=false
           '''
         }
       }
