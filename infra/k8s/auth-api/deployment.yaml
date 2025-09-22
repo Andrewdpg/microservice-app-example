@@ -19,7 +19,7 @@ spec:
           ports:
             - containerPort: 8081
           env:
-            - name: AUTH_API_PORT
+            - name: APP_PORT
               valueFrom:
                 configMapKeyRef: { name: micro-config, key: AUTH_API_PORT }
             - name: USERS_API_ADDRESS

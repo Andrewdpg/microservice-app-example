@@ -24,7 +24,7 @@ var (
 )
 
 func main() {
-	hostport := ":" + os.Getenv("AUTH_API_PORT")
+	hostport := ":" + os.Getenv("APP_PORT")
 	userAPIAddress := os.Getenv("USERS_API_ADDRESS")
 
 	envJwtSecret := os.Getenv("JWT_SECRET")
@@ -76,6 +76,7 @@ func main() {
 	e.POST("/login", getLoginHandler(userService))
 
 	// Start server
+	log.Printf("Starting server on port: %s", hostport)
 	e.Logger.Fatal(e.Start(hostport))
 }
 
