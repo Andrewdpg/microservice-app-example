@@ -15,6 +15,7 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
+        deleteDir()
         checkout scm
         script {
           def shortSha = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
