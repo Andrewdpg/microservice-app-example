@@ -132,13 +132,14 @@ pipeline {
             set -e
             export KUBECONFIG="$KUBECONFIG_FILE"
             mkdir -p infra/k8s/_render
-            for f in $(ls infra/k8s/*.yaml 2>/dev/null) $(ls infra/k8s/*/*.yaml 2>/dev/null); do
-              [ -f "$f" ] || continue
+            # Render all yaml (excluding _render)
+            for f in $(find infra/k8s -type f -name "*.yaml" ! -path "*/_render/*"); do
               name=$(basename "$f")
               sed -e "s|\\${REGISTRY}|${REGISTRY}|g" \
                   -e "s|\\${IMAGE_TAG}|${IMAGE_TAG}|g" "$f" > "infra/k8s/_render/$name"
             done
-            kubectl apply -f infra/k8s/_render --recursive
+            echo "Rendered files:" && ls -la infra/k8s/_render
+            kubectl apply -f infra/k8s/_render -R
           '''
         }
       }
