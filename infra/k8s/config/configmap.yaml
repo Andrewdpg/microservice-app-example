@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: micro-config
+  namespace: micro
+data:
+  # Puertos internos de cada servicio
+  AUTH_API_PORT_CONFIG: "8000"
+  USERS_API_PORT: "8080"
+  TODOS_API_PORT: "3000"
+  FRONTEND_PORT: "80"
+
+  # DNS internos (Kubernetes service DNS)
+  USERS_API_ADDRESS: "http://users-api.micro.svc.cluster.local:8080"
+  AUTH_API_URL: "http://auth-api.micro.svc.cluster.local:8000"
+  TODOS_API_URL: "http://todos-api.micro.svc.cluster.local:3000"
+
+  # Redis
+  REDIS_QUEUE_HOST: "redis-queue.micro.svc.cluster.local"
+  REDIS_QUEUE_PORT: "6379"
+  REDIS_CACHE_HOST: "redis-cache.micro.svc.cluster.local"
+  REDIS_CACHE_PORT: "6379"
+  REDIS_CHANNEL: "log_channel"
+
+  # Observabilidad (ajústalo si instalas Zipkin en otro ns)
+  ZIPKIN_URL: "http://zipkin.observability.svc.cluster.local:9411"
+
+  # JWT shared (puedes moverlo a Secret si quieres)
+  JWT_SECRET: "myfancysecret"

@@ -19,12 +19,27 @@ spec:
           ports:
             - containerPort: 3000
           env:
-            - name: PORT
-              value: "3000"
-            - name: USERS_API_URL
-              value: "http://users-api.micro.svc.cluster.local:8080"
+            - name: TODO_API_PORT
+              valueFrom:
+                configMapKeyRef: { name: micro-config, key: TODOS_API_PORT }
+            - name: USERS_API_ADDRESS
+              valueFrom:
+                configMapKeyRef: { name: micro-config, key: USERS_API_ADDRESS }
             - name: ZIPKIN_URL
-              value: "http://zipkin.observability.svc.cluster.local:9411"
+              valueFrom:
+                configMapKeyRef: { name: micro-config, key: ZIPKIN_URL }
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef: { name: micro-config, key: REDIS_QUEUE_HOST }
+            - name: REDIS_PORT
+              valueFrom:
+                configMapKeyRef: { name: micro-config, key: REDIS_QUEUE_PORT }
+            - name: REDIS_CHANNEL
+              valueFrom:
+                configMapKeyRef: { name: micro-config, key: REDIS_CHANNEL }
+            - name: JWT_SECRET
+              valueFrom:
+                configMapKeyRef: { name: micro-config, key: JWT_SECRET }
           resources:
             requests:
               cpu: "100m"

@@ -6,27 +6,26 @@ metadata:
 spec:
   replicas: 2
   selector:
-    matchLabels:
-      app: users-api
+    matchLabels: { app: users-api }
   template:
     metadata:
-      labels:
-        app: users-api
+      labels: { app: users-api }
     spec:
       containers:
-        - name: users-api
-          image: ${REGISTRY}/users-api:${IMAGE_TAG}
-          ports:
-            - containerPort: 8080
-          env:
-            - name: SPRING_PROFILES_ACTIVE
-              value: "prod"
-          resources:
-            requests:
-              cpu: "150m"
-              memory: "256Mi"
-            limits:
-              cpu: "600m"
-              memory: "512Mi"
-
-
+      - name: users-api
+        image: ${REGISTRY}/users-api:${IMAGE_TAG}
+        ports:
+        - containerPort: 8080
+        env:
+        - name: SERVER_PORT
+          valueFrom:
+            configMapKeyRef: { name: micro-config, key: USERS_API_PORT }
+        - name: REDIS_HOST
+          valueFrom:
+            configMapKeyRef: { name: micro-config, key: REDIS_CACHE_HOST }
+        - name: REDIS_PORT
+          valueFrom:
+            configMapKeyRef: { name: micro-config, key: REDIS_CACHE_PORT }
+        resources:
+          requests: { cpu: "100m", memory: "256Mi" }
+          limits:   { cpu: "400m", memory: "512Mi" }
