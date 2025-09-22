@@ -2,7 +2,7 @@ pipeline {
     agent any
     
     environment {
-        DOCKER_REGISTRY = 'andrewdpg'  // Cambia por tu username de Docker Hub
+        DOCKER_REGISTRY = 'andrewdpg'
         IMAGE_TAG = "${env.BUILD_NUMBER}"
         KUBECONFIG = '/var/jenkins_home/.kube/config'
     }
@@ -20,8 +20,9 @@ pipeline {
                     steps {
                         dir('auth-api') {
                             script {
+                                // Usar el plugin de Docker en lugar de withDockerRegistry
+                                def image = docker.build("${DOCKER_REGISTRY}/auth-api:${IMAGE_TAG}")
                                 docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-                                    def image = docker.build("${DOCKER_REGISTRY}/auth-api:${IMAGE_TAG}")
                                     image.push()
                                     image.push("latest")
                                 }
@@ -34,8 +35,8 @@ pipeline {
                     steps {
                         dir('users-api') {
                             script {
+                                def image = docker.build("${DOCKER_REGISTRY}/users-api:${IMAGE_TAG}")
                                 docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-                                    def image = docker.build("${DOCKER_REGISTRY}/users-api:${IMAGE_TAG}")
                                     image.push()
                                     image.push("latest")
                                 }
@@ -48,8 +49,8 @@ pipeline {
                     steps {
                         dir('todos-api') {
                             script {
+                                def image = docker.build("${DOCKER_REGISTRY}/todos-api:${IMAGE_TAG}")
                                 docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-                                    def image = docker.build("${DOCKER_REGISTRY}/todos-api:${IMAGE_TAG}")
                                     image.push()
                                     image.push("latest")
                                 }
@@ -62,8 +63,8 @@ pipeline {
                     steps {
                         dir('log-message-processor') {
                             script {
+                                def image = docker.build("${DOCKER_REGISTRY}/log-processor:${IMAGE_TAG}")
                                 docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-                                    def image = docker.build("${DOCKER_REGISTRY}/log-processor:${IMAGE_TAG}")
                                     image.push()
                                     image.push("latest")
                                 }
@@ -76,8 +77,8 @@ pipeline {
                     steps {
                         dir('frontend') {
                             script {
+                                def image = docker.build("${DOCKER_REGISTRY}/frontend:${IMAGE_TAG}")
                                 docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials') {
-                                    def image = docker.build("${DOCKER_REGISTRY}/frontend:${IMAGE_TAG}")
                                     image.push()
                                     image.push("latest")
                                 }
@@ -142,7 +143,7 @@ pipeline {
     
     post {
         always {
-            sh 'docker system prune -f'
+            sh 'docker system prune -f || true'  # Agregar || true para evitar fallo
         }
         success {
             echo 'Pipeline executed successfully!'
