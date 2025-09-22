@@ -49,6 +49,7 @@ services:
       - AUTH_API_PORT=8081
       - JWT_SECRET=myfancysecret
       - USERS_API_ADDRESS=http://users-api:8083
+      - ZIPKIN_URL=http://zipkin:9411/api/v2/spans
     depends_on:
       - users-api
     networks:
@@ -64,6 +65,7 @@ services:
       - SERVER_PORT=8083
       - REDIS_HOST=redis-cache
       - REDIS_PORT=6379
+      - ZIPKIN_URL=http://zipkin:9411/api/v2/spans
     depends_on:
       - redis-cache
     networks:
@@ -82,6 +84,7 @@ services:
       - REDIS_PORT=6379
       - REDIS_CHANNEL=log_channel
       - USERS_API_ADDRESS=http://users-api:8083
+      - ZIPKIN_URL=http://zipkin:9411/api/v2/spans
     depends_on:
       - redis-queue
       - users-api
@@ -96,6 +99,7 @@ services:
       - REDIS_HOST=redis-queue
       - REDIS_PORT=6379
       - REDIS_CHANNEL=log_channel
+      - ZIPKIN_URL=http://zipkin:9411/api/v2/spans
     depends_on:
       - redis-queue
     networks:
@@ -108,8 +112,9 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - AUTH_API_URL=http://auth-api:8081
-      - TODOS_API_URL=http://todos-api:8082
+      - AUTH_API_ADDRESS=http://auth-api:8081
+      - TODOS_API_ADDRESS=http://todos-api:8082
+      - ZIPKIN_URL=http://zipkin:9411/api/v2/spans
     depends_on:
       - auth-api
       - todos-api
