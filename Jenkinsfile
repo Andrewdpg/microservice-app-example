@@ -45,10 +45,11 @@ pipeline {
           }
         }
         stage('frontend (Vue)') {
-          agent { docker { image 'node:18-alpine' } }
+          agent { docker { image 'node:12-buster' } }
           steps {
             unstash 'ws'
             dir('frontend') {
+              sh 'apt-get update && apt-get install -y python make g++'
               sh 'npm ci'
               sh 'npm run build'
             }
