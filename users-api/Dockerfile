@@ -1,5 +1,5 @@
 # Build stage
-FROM maven:3.8.6-openjdk-11-slim AS builder
+FROM maven:3.6.3-jdk-8 AS builder
 
 WORKDIR /app
 COPY pom.xml .
@@ -9,7 +9,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Runtime stage
-FROM openjdk:11-jre-slim
+FROM openjdk:8-jre-alpine
 
 WORKDIR /app
 
