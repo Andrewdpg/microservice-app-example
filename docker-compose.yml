@@ -1,7 +1,9 @@
 services:
-  # Jenkins
   jenkins:
-    image: jenkins/jenkins:lts
+    build:
+      context: .
+      dockerfile: infra/jenkins.Dockerfile
+    image: jenkins-with-dockercli:latest
     container_name: jenkins
     user: root
     ports:
@@ -10,7 +12,6 @@ services:
     volumes:
       - jenkins_home:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
-      - /usr/local/bin/docker:/usr/local/bin/docker
     environment:
       - DOCKER_HOST=unix:///var/run/docker.sock
     networks:

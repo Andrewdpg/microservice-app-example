@@ -1,5 +1,6 @@
 # Build stage
-FROM node:16-alpine AS builder
+# 8.17.0-alpine
+FROM node:8.17.0-alpine AS builder
 
 WORKDIR /app
 COPY package*.json ./
@@ -8,7 +9,7 @@ COPY package*.json ./
 RUN npm ci --only=production
 
 # Runtime stage
-FROM node:16-alpine
+FROM node:8.17.0-alpine
 
 WORKDIR /app
 
