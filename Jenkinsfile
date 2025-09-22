@@ -117,29 +117,35 @@ pipeline {
     }
 
     stage('Deploy to K8s') {
-      when {
-        anyOf { branch 'main'; branch 'master' }
-      }
       agent {
         docker {
           image 'bitnami/kubectl:1.29'
-          args '--entrypoint=""'
+          args '-u 0:0 --entrypoint=""' // sin --network
         }
       }
       steps {
-        withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')]) {
+        withCredentials([file(credentialsId: 'jenkins-kubeconfig', variable: 'KCFG')]) {
           sh '''
             set -e
-            export KUBECONFIG="$KUBECONFIG_FILE"
+            # 1) Descubre el puerto del API de kind en el host
+            HOSTPORT=$(docker inspect ci-control-plane --format '{{(index (index .NetworkSettings.Ports "6443/tcp") 0).HostPort}}')
+
+            # 2) Genera kubeconfig temporal con server en host.docker.internal:HOSTPORT
+            cp jenkins-kubeconfig.yaml k.tmp.yaml
+            sed -i "s#^\\s*server: .*#    server: https://host.docker.internal:${HOSTPORT}#g" k.tmp.yaml
+
+            # 3) Aplica primero namespaces y luego todo lo renderizado (evita validar OpenAPI para no depender de conectividad extra)
             mkdir -p infra/k8s/_render
-            # Render all yaml (excluding _render)
-            for f in $(find infra/k8s -type f -name "*.yaml" ! -path "*/_render/*"); do
+            cp infra/k8s/namespaces.yaml infra/k8s/_render/
+            find infra/k8s -type f -name "*.yaml" ! -path "*/_render/*" ! -name "kustomization.yaml" | while read f; do
               name=$(basename "$f")
-              sed -e "s|\\${REGISTRY}|${REGISTRY}|g" \
-                  -e "s|\\${IMAGE_TAG}|${IMAGE_TAG}|g" "$f" > "infra/k8s/_render/$name"
+              sed -e "s|\\${REGISTRY}|${REGISTRY}|g" -e "s|\\${IMAGE_TAG}|${IMAGE_TAG}|g" "$f" > "infra/k8s/_render/$name"
             done
-            echo "Rendered files:" && ls -la infra/k8s/_render
-            kubectl apply -f infra/k8s/_render -R
+
+            echo "Rendered files:"; ls -la infra/k8s/_render
+
+            kubectl --kubeconfig k.tmp.yaml apply -f infra/k8s/namespaces.yaml --validate=false
+            kubectl --kubeconfig k.tmp.yaml apply -f infra/k8s/_render -R --validate=false
           '''
         }
       }
