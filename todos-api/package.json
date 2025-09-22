@@ -4,7 +4,7 @@
   "description": "API for Todos in my little example app",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon server.js"
+    "start": "node server.js"
   },
   "author": "elgris <iddqd07@yandex.ru>",
   "license": "MIT",
