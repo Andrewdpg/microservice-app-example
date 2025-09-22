@@ -120,7 +120,12 @@ pipeline {
       when {
         anyOf { branch 'main'; branch 'master' }
       }
-      agent { docker { image 'bitnami/kubectl:1.29' args "--entrypoint=''" } }
+      agent {
+        docker {
+          image 'bitnami/kubectl:1.29'
+          args '--entrypoint=""'
+        }
+      }
       steps {
         withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')]) {
           sh '''
