@@ -33,6 +33,35 @@ pipeline {
       }
     }
 
+    stage('Docker Build') {
+      steps {
+        unstash 'ws'
+        withCredentials([usernamePassword(credentialsId: "${DOCKERHUB}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+          sh '''
+            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+            docker build -t ${REGISTRY}/todos-api:${IMAGE_TAG} ./todos-api
+            docker build -t ${REGISTRY}/frontend:${IMAGE_TAG} ./frontend
+            docker build -t ${REGISTRY}/users-api:${IMAGE_TAG} ./users-api
+            docker build -t ${REGISTRY}/auth-api:${IMAGE_TAG} ./auth-api
+            docker build -t ${REGISTRY}/log-message-processor:${IMAGE_TAG} ./log-message-processor
+          '''
+        }
+      }
+    }
+
+    stage('Docker Push') {
+      steps {
+        unstash 'ws'
+        sh '''
+          docker push ${REGISTRY}/todos-api:${IMAGE_TAG}
+          docker push ${REGISTRY}/frontend:${IMAGE_TAG}
+          docker push ${REGISTRY}/users-api:${IMAGE_TAG}
+          docker push ${REGISTRY}/auth-api:${IMAGE_TAG}
+          docker push ${REGISTRY}/log-message-processor:${IMAGE_TAG}
+        '''
+      }
+    }
+
     stage('Deploy to K8s') {
       agent {
         docker {
