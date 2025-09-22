@@ -46,9 +46,12 @@ pipeline {
             set -e
             rm -rf infra/k8s/_render && mkdir -p infra/k8s/_render
             cp infra/k8s/namespaces.yaml infra/k8s/_render/
-            find infra/k8s -type f -name "*.yaml" ! -path "*/_render/*" ! -name "kustomization.yaml" | while read f; do
-              name=$(basename "$f")
-              sed -e "s|\\${REGISTRY}|${REGISTRY}|g" -e "s|\\${IMAGE_TAG}|${IMAGE_TAG}|g" "$f" > "infra/k8s/_render/$name"
+            find infra/k8s -type f -name "*.yaml" \
+              ! -path "*/_render/*" \
+              ! -name "kustomization.yaml" \
+              ! -name "rbac-jenkins.yaml" | while read f; do
+                name=$(basename "$f")
+                sed -e "s|\\${REGISTRY}|${REGISTRY}|g" -e "s|\\${IMAGE_TAG}|${IMAGE_TAG}|g" "$f" > "infra/k8s/_render/$name"
             done
             echo "Rendered files:"; ls -la infra/k8s/_render
 
