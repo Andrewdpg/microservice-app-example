@@ -45,19 +45,11 @@ pipeline {
           }
         }
         stage('frontend (Vue)') {
-          agent { docker { image 'node:12-buster' } }
+          agent { docker { image 'node:8.17.0-alpine' } }
           steps {
             unstash 'ws'
             dir('frontend') {
-              sh '''
-                set -eux
-                node -v
-                npm -v
-                # Retry apt in case of mirror hiccups
-                (apt-get update && apt-get install -y python make g++) || (
-                  echo "apt failed, retrying in 5s" && sleep 5 && apt-get update && apt-get install -y python make g++
-                )
-              '''
+              sh 'node -v && npm -v'
               sh 'npm ci'
               sh 'npm run build'
             }
