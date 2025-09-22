@@ -120,15 +120,18 @@ pipeline {
       when {
         anyOf { branch 'main'; branch 'master' }
       }
+      agent { docker { image 'bitnami/kubectl:1.29' } }
       steps {
         withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG_FILE')]) {
           sh '''
+            set -e
             export KUBECONFIG="$KUBECONFIG_FILE"
             mkdir -p infra/k8s/_render
-            export REGISTRY=${REGISTRY}
-            export IMAGE_TAG=${IMAGE_TAG}
-            find infra/k8s -type f -name "*.yaml" ! -path "*/_render/*" -print0 | while IFS= read -r -d '' f; do
-              envsubst < "$f" > "infra/k8s/_render/$(basename $f)"
+            for f in $(ls infra/k8s/*.yaml 2>/dev/null) $(ls infra/k8s/*/*.yaml 2>/dev/null); do
+              [ -f "$f" ] || continue
+              name=$(basename "$f")
+              sed -e "s|\\${REGISTRY}|${REGISTRY}|g" \
+                  -e "s|\\${IMAGE_TAG}|${IMAGE_TAG}|g" "$f" > "infra/k8s/_render/$name"
             done
             kubectl apply -f infra/k8s/_render --recursive
           '''
