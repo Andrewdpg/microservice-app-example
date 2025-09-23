@@ -70,6 +70,7 @@ pipeline {
         }
       }
       steps {
+        unstash 'ws'
         withCredentials([file(credentialsId: 'kubeconfig', variable: 'KCFG')]) {
           sh '''
             set -e
@@ -95,11 +96,9 @@ pipeline {
             kubectl --kubeconfig "$KCFG" apply -f infra/k8s/namespaces.yaml --validate=false
             kubectl --kubeconfig "$KCFG" apply -f infra/k8s/_render -R --validate=false
           '''
+          }
         }
-      }
     }
   }
 
 }
-
-

@@ -3,6 +3,12 @@ kind: Deployment
 metadata:
   name: users-api
   namespace: micro
+  annotations:
+    jenkins.io/ignore: "true"
+    deployment.kubernetes.io/revision: "1"
+  labels:
+    app: users-api
+    managed-by: "manual"
 spec:
   replicas: 1
   selector:
@@ -13,7 +19,7 @@ spec:
     spec:
       containers:
       - name: users-api
-        image: ${REGISTRY}/users-api:${IMAGE_TAG}
+        image: docker.io/andrewdpg/users-api:master-aeddd88
         ports:
         - containerPort: 8083
         env:

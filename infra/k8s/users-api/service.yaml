@@ -4,9 +4,10 @@ metadata:
   name: users-api
   namespace: micro
 spec:
-  selector: { app: users-api }
+  selector:
+    app: users-api
   ports:
   - port: 8083
     targetPort: 8083
-
-
+    protocol: TCP
+  type: NodePort

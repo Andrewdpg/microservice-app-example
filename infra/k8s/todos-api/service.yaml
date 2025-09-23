@@ -7,8 +7,7 @@ spec:
   selector:
     app: todos-api
   ports:
-    - port: 8082
-      targetPort: 8082
-      protocol: TCP
-
-
+  - port: 8082
+    targetPort: 8082
+    protocol: TCP
+  type: NodePort
