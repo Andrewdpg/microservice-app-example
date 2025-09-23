@@ -1,0 +1,31 @@
+Manifest-Version: 1.0
+Created-By: Maven Archiver 3.6.3
+Build-Jdk-Spec: 17
+Specification-Title: Pipeline Graph View Plugin
+Specification-Version: 0.0
+Implementation-Title: Pipeline Graph View Plugin
+Implementation-Version: 642.v39f37c8e1e70
+Group-Id: io.jenkins.plugins
+Artifact-Id: pipeline-graph-view
+Short-Name: pipeline-graph-view
+Long-Name: Pipeline Graph View Plugin
+Url: https://github.com/jenkinsci/pipeline-graph-view-plugin
+Plugin-Version: 642.v39f37c8e1e70
+Hudson-Version: 2.504.3
+Jenkins-Version: 2.504.3
+Plugin-Dependencies: ionicons-api:94.vcc3065403257,workflow-cps:4183.v94
+ b_6fd39da_c1,workflow-durable-task-step:1452.v0ee719c104a_7,workflow-jo
+ b:1540.v295eccc9778f,display-url-api:2.217.va_6b_de84cc74b_,git:5.7.0;r
+ esolution:=optional,github-branch-source:1848.v42f74f7f4500;resolution:
+ =optional,junit:1354.v5b_348580de7f;resolution:=optional,metrics:4.2.33
+ -484.v2fcd689980d1,pipeline-input-step:534.v352f0a_e98918,pipeline-mode
+ l-definition:2.2265.v140e610fe9d5
+Plugin-Developers: 
+Plugin-License-Name: MIT License
+Plugin-License-Url: https://opensource.org/licenses/MIT
+Plugin-ScmConnection: scm:git:https://github.com/jenkinsci/pipeline-grap
+ h-view-plugin.git
+Plugin-ScmTag: 39f37c8e1e70b7ed61f3997f570a6e39c454cd53
+Plugin-ScmUrl: https://github.com/jenkinsci/pipeline-graph-view-plugin
+Implementation-Build: 39f37c8e1e70b7ed61f3997f570a6e39c454cd53
+

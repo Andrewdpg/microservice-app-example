@@ -1,0 +1,26 @@
+Manifest-Version: 1.0
+Created-By: Maven Archiver 3.6.3
+Build-Jdk-Spec: 21
+Specification-Title: Commons Compress API
+Specification-Version: 1.28
+Implementation-Title: Commons Compress API
+Implementation-Version: 1.28.0-1
+Group-Id: io.jenkins.plugins
+Artifact-Id: commons-compress-api
+Short-Name: commons-compress-api
+Long-Name: Commons Compress API
+Url: https://github.com/jenkinsci/commons-compress-api-plugin
+Plugin-Version: 1.28.0-1
+Hudson-Version: 2.489
+Jenkins-Version: 2.489
+Plugin-Dependencies: commons-lang3-api:3.18.0-98.v3a_674c06072d
+Plugin-Developers: 
+Support-Dynamic-Loading: true
+Plugin-License-Name: Apache-2.0
+Plugin-License-Url: https://opensource.org/licenses/Apache-2.0
+Plugin-ScmConnection: scm:git:https://github.com/jenkinsci/commons-compr
+ ess-api-plugin.git
+Plugin-ScmTag: commons-compress-api-1.28.0-1
+Plugin-ScmUrl: https://github.com/jenkinsci/commons-compress-api-plugin
+Implementation-Build: 9c736cd520551a2ae08d21cf9ef3721b6fe73e90
+

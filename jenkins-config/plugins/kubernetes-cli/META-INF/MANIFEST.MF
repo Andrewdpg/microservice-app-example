@@ -1,0 +1,27 @@
+Manifest-Version: 1.0
+Created-By: Maven Archiver 3.6.0
+Build-Jdk-Spec: 17
+Specification-Title: Kubernetes CLI Plugin
+Specification-Version: 0.0
+Implementation-Title: Kubernetes CLI Plugin
+Implementation-Version: 1.364.vadef8cb8b823
+Group-Id: org.jenkins-ci.plugins
+Artifact-Id: kubernetes-cli
+Short-Name: kubernetes-cli
+Long-Name: Kubernetes CLI Plugin
+Url: https://github.com/jenkinsci/kubernetes-cli-plugin
+Compatible-Since-Version: 1.0.0
+Plugin-Version: 1.364.vadef8cb8b823
+Hudson-Version: 2.479.1
+Jenkins-Version: 2.479.1
+Plugin-Dependencies: workflow-step-api:678.v3ee58b_469476,apache-httpcom
+ ponents-client-4-api:4.5.14-208.v438351942757,authentication-tokens:1.1
+ 19.v50285141b_7e1,credentials:1405.vb_cda_74a_f8974,plain-credentials:1
+ 83.va_de8f1dd5a_2b_,kubernetes-credentials:190.v03c305394deb_
+Plugin-Developers: Max Laverse:max_laverse:
+Plugin-ScmConnection: scm:git:https://github.com/jenkinsci/kubernetes-cl
+ i-plugin.git
+Plugin-ScmTag: adef8cb8b82310475ddeeac634a82b18939207b3
+Plugin-ScmUrl: https://github.com/jenkinsci/kubernetes-cli-plugin
+Implementation-Build: adef8cb8b82310475ddeeac634a82b18939207b3
+

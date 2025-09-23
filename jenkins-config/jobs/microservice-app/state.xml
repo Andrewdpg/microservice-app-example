@@ -1,0 +1,22 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<jenkins.branch.MultiBranchProject_-State plugin="branch-api@2.1244.vf95c81f1641c">
+  <sourceActions>
+    <entry>
+      <string>5f7e3b23-48a0-4cfb-b6d1-e1214a62debb</string>
+      <list>
+        <org.jenkinsci.plugins.github__branch__source.GitHubRepoMetadataAction plugin="github-branch-source@1864.v411feec5e78e"/>
+        <jenkins.scm.api.metadata.ObjectMetadataAction plugin="scm-api@707.v749f968369d4">
+          <objectDescription>Polyglot Microservice App - PRFT Devops Hub</objectDescription>
+        </jenkins.scm.api.metadata.ObjectMetadataAction>
+        <org.jenkinsci.plugins.github__branch__source.GitHubLink plugin="github-branch-source@1864.v411feec5e78e">
+          <url>https://github.com/Andrewdpg/microservice-app-example</url>
+        </org.jenkinsci.plugins.github__branch__source.GitHubLink>
+        <org.jenkinsci.plugins.github__branch__source.GitHubDefaultBranch plugin="github-branch-source@1864.v411feec5e78e">
+          <repoOwner>Andrewdpg</repoOwner>
+          <repository>microservice-app-example</repository>
+          <defaultBranch>master</defaultBranch>
+        </org.jenkinsci.plugins.github__branch__source.GitHubDefaultBranch>
+      </list>
+    </entry>
+  </sourceActions>
+</jenkins.branch.MultiBranchProject_-State>

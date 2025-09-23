@@ -1,0 +1,28 @@
+Manifest-Version: 1.0
+Created-By: Maven Archiver 3.6.0
+Build-Jdk-Spec: 17
+Specification-Title: Kubernetes Client API Plugin
+Specification-Version: 7.3
+Implementation-Title: Kubernetes Client API Plugin
+Implementation-Version: 7.3.1-256.v788a_0b_787114
+Group-Id: org.jenkins-ci.plugins
+Artifact-Id: kubernetes-client-api
+Short-Name: kubernetes-client-api
+Long-Name: Kubernetes Client API Plugin
+Url: https://github.com/jenkinsci/kubernetes-client-api-plugin
+Compatible-Since-Version: 6.8.1
+Plugin-Version: 7.3.1-256.v788a_0b_787114
+Hudson-Version: 2.479.3
+Jenkins-Version: 2.479.3
+Plugin-Dependencies: okhttp-api:4.11.0-189.v976fa_d3379d6,bouncycastle-a
+ pi:2.30.1.80-261.v00c0e2618ec3,jackson2-api:2.19.0-404.vb_b_0fd2fea_e10
+Plugin-Developers: 
+Support-Dynamic-Loading: true
+Plugin-License-Name: The Apache Software License, Version 2.0
+Plugin-License-Url: http://www.apache.org/licenses/LICENSE-2.0.txt
+Plugin-ScmConnection: scm:git:https://github.com/jenkinsci/kubernetes-cl
+ ient-api-plugin
+Plugin-ScmTag: 788a0b787114914dd465c8d65ceeda3757126926
+Plugin-ScmUrl: https://github.com/jenkinsci/kubernetes-client-api-plugin
+Implementation-Build: 788a0b787114914dd465c8d65ceeda3757126926
+

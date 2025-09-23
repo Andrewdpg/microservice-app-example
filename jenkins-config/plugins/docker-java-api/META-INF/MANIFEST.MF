@@ -1,0 +1,30 @@
+Manifest-Version: 1.0
+Created-By: Maven Archiver 3.6.3
+Build-Jdk-Spec: 17
+Specification-Title: Docker API Plugin
+Specification-Version: 3.5
+Implementation-Title: Docker API Plugin
+Implementation-Version: 3.5.3-122.v156e51f30c0a_
+Group-Id: org.jenkins-ci.plugins
+Artifact-Id: docker-java-api
+Short-Name: docker-java-api
+Long-Name: Docker API Plugin
+Url: https://github.com/jenkinsci/docker-java-api-plugin
+Compatible-Since-Version: 3.2
+Plugin-Version: 3.5.3-122.v156e51f30c0a_
+Hudson-Version: 2.479.3
+Jenkins-Version: 2.479.3
+Plugin-Dependencies: apache-httpcomponents-client-5-api:5.5-150.veb_76e7
+ 19855b_,commons-compress-api:1.26.1-2,commons-lang3-api:3.18.0-98.v3a_6
+ 74c06072d,bouncycastle-api:2.30.1.80-261.v00c0e2618ec3,jackson2-api:2.1
+ 8.3-402.v74c4eb_f122b_2
+Plugin-Developers: 
+Support-Dynamic-Loading: true
+Plugin-License-Name: MIT
+Plugin-License-Url: https://opensource.org/licenses/MIT
+Plugin-ScmConnection: scm:git:https://github.com/jenkinsci/docker-java-a
+ pi-plugin.git
+Plugin-ScmTag: 156e51f30c0ae53899d73eb03a12af4f129f54b1
+Plugin-ScmUrl: https://github.com/jenkinsci/docker-java-api-plugin
+Implementation-Build: 156e51f30c0ae53899d73eb03a12af4f129f54b1
+
