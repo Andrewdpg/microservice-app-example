@@ -7,19 +7,19 @@ nodes:
 - role: control-plane
   image: kindest/node:v1.34.0
   extraPortMappings:
-  - containerPort: 80
+  - containerPort: 30080
     hostPort: 8080
     listenAddress: "0.0.0.0"
     protocol: TCP
-  - containerPort: 8081
+  - containerPort: 30081
     hostPort: 8081
     listenAddress: "0.0.0.0"
     protocol: TCP
-  - containerPort: 8082
+  - containerPort: 30082
     hostPort: 8082
     listenAddress: "0.0.0.0"
     protocol: TCP
-  - containerPort: 8083
+  - containerPort: 30083
     hostPort: 8083
     listenAddress: "0.0.0.0"
     protocol: TCP
