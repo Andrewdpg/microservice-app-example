@@ -200,32 +200,12 @@ if ($tempCredentialsFile -and (Test-Path $tempCredentialsFile)) {
     Write-Host "Error: No se pudo crear o encontrar el archivo de credenciales" -ForegroundColor Red
 }
 
-# Ajustar permisos
-Write-Host "Ajustando permisos..." -ForegroundColor Yellow
-docker exec jenkins chown -R jenkins:jenkins /var/jenkins_home/
-
 # Iniciar Jenkins
 Write-Host "Iniciando Jenkins..." -ForegroundColor Yellow
 docker start jenkins
 
-# Esperar a que Jenkins este listo
-Write-Host "Esperando a que Jenkins este listo..." -ForegroundColor Yellow
-$maxAttempts = 30
-$attempt = 0
-do {
-    $attempt++
-    Start-Sleep -Seconds 10
-    
-    try {
-        $response = Invoke-WebRequest -Uri "http://localhost:8079" -TimeoutSec 5 -ErrorAction SilentlyContinue
-        if ($response.StatusCode -eq 200) {
-            Write-Host "Jenkins esta listo!" -ForegroundColor Green
-            break
-        }
-    } catch {
-        # Continuar esperando
-    }
-} while ($attempt -lt $maxAttempts)
+# Ajustar permisos
+Write-Host "Ajustando permisos..." -ForegroundColor Yellow
+docker exec jenkins chown -R jenkins:jenkins /var/jenkins_home/
 
 Write-Host "Configuracion importada de forma segura!" -ForegroundColor Green
-Write-Host "Jenkins disponible en: http://localhost:8079" -ForegroundColor Cyan

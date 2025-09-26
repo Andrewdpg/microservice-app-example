@@ -85,6 +85,7 @@ pipeline {
               ! -path "*/_render/*" \
               ! -name "kustomization.yaml" \
               ! -name "rbac-jenkins.yaml" \
+              ! -name "kind.yaml" \
               -print | while read -r f; do
                 out="infra/k8s/_render/${f#infra/k8s/}"
                 mkdir -p "$(dirname "$out")"
