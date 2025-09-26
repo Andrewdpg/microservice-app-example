@@ -41,11 +41,11 @@ type UserService struct {
 func NewUserService(client HTTPDoer, userAPIAddress string) *UserService {
 	cb := gobreaker.NewCircuitBreaker(gobreaker.Settings{
 		Name:        "users-api",
-		MaxRequests: 3,                    // Máximo 3 requests en half-open
+		MaxRequests: 1,                    // Máximo 1 requests en half-open
 		Interval:    30 * time.Second,     // Ventana de tiempo
-		Timeout:     10 * time.Second,     // Timeout por request
+		Timeout:     30 * time.Second,     // Timeout por request
 		ReadyToTrip: func(counts gobreaker.Counts) bool {
-			return counts.ConsecutiveFailures >= 5 // 5 fallos → abrir
+			return counts.ConsecutiveFailures >= 3 // 3 fallos → abrir
 		},
 		OnStateChange: func(name string, from gobreaker.State, to gobreaker.State) {
 			log.Printf("Circuit breaker %s changed from %s to %s", name, from, to)
