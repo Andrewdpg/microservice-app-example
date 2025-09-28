@@ -153,9 +153,18 @@ pipeline {
         script {
           echo "Triggering infrastructure deployment for STAGING with ${env.IMAGE_TAG} on ${env.BRANCH_NAME}..."
           
-          // Usar curl en lugar de httpRequest
+          // Obtener el crumb de Jenkins
+          def crumb = sh(
+            script: "curl -s -u admin:${JENKINS_TOKEN} '${INFRA_JENKINS_URL}/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,\":\",//crumb)'",
+            returnStdout: true
+          ).trim()
+          
+          // Usar curl con el crumb
           sh """
-            curl -X POST "${INFRA_JENKINS_URL}/job/${INFRA_JENKINS_JOB}/buildWithParameters?token=${JENKINS_TOKEN}&IMAGE_TAG=${env.IMAGE_TAG}&REGISTRY=${REGISTRY}&GIT_COMMIT=${env.GIT_COMMIT}&GIT_BRANCH=${env.BRANCH_NAME}&ENVIRONMENT=staging"
+            curl -X POST \
+              -H "${crumb}" \
+              -u admin:${JENKINS_TOKEN} \
+              "${INFRA_JENKINS_URL}/job/${INFRA_JENKINS_JOB}/buildWithParameters?IMAGE_TAG=${env.IMAGE_TAG}&REGISTRY=${REGISTRY}&GIT_COMMIT=${env.GIT_COMMIT}&GIT_BRANCH=${env.BRANCH_NAME}&ENVIRONMENT=staging"
           """
           
           echo "Infrastructure deployment to STAGING triggered."
@@ -171,9 +180,18 @@ pipeline {
         script {
           echo "Triggering infrastructure deployment for PRODUCTION with ${env.IMAGE_TAG} on ${env.BRANCH_NAME}..."
           
-          // Usar curl en lugar de httpRequest
+          // Obtener el crumb de Jenkins
+          def crumb = sh(
+            script: "curl -s -u admin:${JENKINS_TOKEN} '${INFRA_JENKINS_URL}/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,\":\",//crumb)'",
+            returnStdout: true
+          ).trim()
+          
+          // Usar curl con el crumb
           sh """
-            curl -X POST "${INFRA_JENKINS_URL}/job/${INFRA_JENKINS_JOB}/buildWithParameters?token=${JENKINS_TOKEN}&IMAGE_TAG=${env.IMAGE_TAG}&REGISTRY=${REGISTRY}&GIT_COMMIT=${env.GIT_COMMIT}&GIT_BRANCH=${env.BRANCH_NAME}&ENVIRONMENT=production"
+            curl -X POST \
+              -H "${crumb}" \
+              -u admin:${JENKINS_TOKEN} \
+              "${INFRA_JENKINS_URL}/job/${INFRA_JENKINS_JOB}/buildWithParameters?IMAGE_TAG=${env.IMAGE_TAG}&REGISTRY=${REGISTRY}&GIT_COMMIT=${env.GIT_COMMIT}&GIT_BRANCH=${env.BRANCH_NAME}&ENVIRONMENT=production"
           """
           
           echo "Infrastructure deployment to PRODUCTION triggered."
