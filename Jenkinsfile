@@ -4,9 +4,9 @@ pipeline {
   environment {
     REGISTRY = 'docker.io/andrewdpg'
     DOCKERHUB = 'docker-hub-credentials'
-    INFRA_JENKINS_URL = 'http://localhost:8079'  // ← URL de tu Jenkins
+    INFRA_JENKINS_URL = 'http://jenkins:8079'
     INFRA_JENKINS_JOB = 'microservice-infrastructure-deploy'
-    JENKINS_TOKEN = credentials('jenkins-api-token')  // ← Credencial para llamar al job de infra
+    JENKINS_TOKEN = credentials('jenkins-api-token')
   }
 
   options {
@@ -44,7 +44,6 @@ pipeline {
             dir('auth-api') {
               sh '''
                 echo "Testing Auth API..."
-                # Aquí irían los tests unitarios de Go
                 go test ./... || echo "Tests not implemented yet"
               '''
             }
@@ -57,7 +56,6 @@ pipeline {
             dir('users-api') {
               sh '''
                 echo "Testing Users API..."
-                # Aquí irían los tests unitarios de Java
                 ./mvnw test || echo "Tests not implemented yet"
               '''
             }
@@ -70,7 +68,6 @@ pipeline {
             dir('todos-api') {
               sh '''
                 echo "Testing TODOs API..."
-                # Aquí irían los tests unitarios de Node.js
                 npm test || echo "Tests not implemented yet"
               '''
             }
@@ -83,7 +80,6 @@ pipeline {
             dir('frontend') {
               sh '''
                 echo "Testing Frontend..."
-                # Aquí irían los tests unitarios de Vue.js
                 npm test || echo "Tests not implemented yet"
               '''
             }
@@ -96,7 +92,6 @@ pipeline {
             dir('log-message-processor') {
               sh '''
                 echo "Testing Log Processor..."
-                # Aquí irían los tests unitarios de Python
                 python -m pytest || echo "Tests not implemented yet"
               '''
             }
@@ -144,38 +139,53 @@ pipeline {
       }
     }
 
-    stage('Trigger Infrastructure Deployment') {
+    stage('Trigger Infrastructure Deployment - Staging') {
       when {
-        branch 'main'
+        branch 'dev'  // ← Solo para branch dev
       }
       steps {
         script {
-          echo "Triggering infrastructure deployment for ${env.IMAGE_TAG} on ${env.BRANCH_NAME}..."
+          echo "Triggering infrastructure deployment for STAGING with ${env.IMAGE_TAG} on ${env.BRANCH_NAME}..."
           
-          // Llamar al job de infraestructura
+          // Llamar al job de infraestructura para STAGING
           def post = new URL("${INFRA_JENKINS_URL}/job/${INFRA_JENKINS_JOB}/buildWithParameters?token=${JENKINS_TOKEN}&IMAGE_TAG=${env.IMAGE_TAG}&REGISTRY=${REGISTRY}&GIT_COMMIT=${env.GIT_COMMIT}&GIT_BRANCH=${env.BRANCH_NAME}&ENVIRONMENT=staging")
           post.openConnection().setRequestMethod("POST")
           post.openConnection().connect()
           
-          echo "Infrastructure deployment triggered."
+          echo "Infrastructure deployment to STAGING triggered."
+        }
+      }
+    }
+
+    stage('Trigger Infrastructure Deployment - Production') {
+      when {
+        branch 'release'  // ← Solo para branch release
+      }
+      steps {
+        script {
+          echo "Triggering infrastructure deployment for PRODUCTION with ${env.IMAGE_TAG} on ${env.BRANCH_NAME}..."
+          
+          // Llamar al job de infraestructura para PRODUCTION
+          def post = new URL("${INFRA_JENKINS_URL}/job/${INFRA_JENKINS_JOB}/buildWithParameters?token=${JENKINS_TOKEN}&IMAGE_TAG=${env.IMAGE_TAG}&REGISTRY=${REGISTRY}&GIT_COMMIT=${env.GIT_COMMIT}&GIT_BRANCH=${env.BRANCH_NAME}&ENVIRONMENT=production")
+          post.openConnection().setRequestMethod("POST")
+          post.openConnection().connect()
+          
+          echo "Infrastructure deployment to PRODUCTION triggered."
         }
       }
     }
   }
 
   post {
-    always {
-      // Limpiar archivos temporales
-      sh '''
-        docker system prune -f
-      '''
-    }
-    
     success {
       echo "Build and push completed successfully"
       script {
-        if (env.BRANCH_NAME == 'main') {
-          echo "Infrastructure deployment triggered for staging"
+        if (env.BRANCH_NAME == 'dev') {
+          echo "Infrastructure deployment to STAGING triggered"
+        } else if (env.BRANCH_NAME == 'release') {
+          echo "Infrastructure deployment to PRODUCTION triggered"
+        } else {
+          echo "No infrastructure deployment triggered for branch: ${env.BRANCH_NAME}"
         }
       }
     }
