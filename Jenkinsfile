@@ -4,7 +4,7 @@ pipeline {
   environment {
     REGISTRY = 'docker.io/andrewdpg'
     DOCKERHUB = 'docker-hub-credentials'
-    INFRA_JENKINS_URL = 'http://jenkins:8079'
+    INFRA_JENKINS_URL = 'http://jenkins:8080'
     INFRA_JENKINS_JOB = 'microservice-infrastructure-deploy'
     JENKINS_TOKEN = credentials('jenkins-api-token')
   }
