@@ -153,14 +153,11 @@ pipeline {
         script {
           echo "Triggering infrastructure deployment for STAGING with ${env.IMAGE_TAG} on ${env.BRANCH_NAME}..."
           
-          // Usar httpRequest en lugar de URL.openConnection
-          def response = httpRequest(
-            url: "${INFRA_JENKINS_URL}/job/${INFRA_JENKINS_JOB}/buildWithParameters?token=${JENKINS_TOKEN}&IMAGE_TAG=${env.IMAGE_TAG}&REGISTRY=${REGISTRY}&GIT_COMMIT=${env.GIT_COMMIT}&GIT_BRANCH=${env.BRANCH_NAME}&ENVIRONMENT=staging",
-            httpMode: 'POST',
-            validResponseCodes: '200,201,202'
-          )
+          // Usar curl en lugar de httpRequest
+          sh """
+            curl -X POST "${INFRA_JENKINS_URL}/job/${INFRA_JENKINS_JOB}/buildWithParameters?token=${JENKINS_TOKEN}&IMAGE_TAG=${env.IMAGE_TAG}&REGISTRY=${REGISTRY}&GIT_COMMIT=${env.GIT_COMMIT}&GIT_BRANCH=${env.BRANCH_NAME}&ENVIRONMENT=staging"
+          """
           
-          echo "Response status: ${response.status}"
           echo "Infrastructure deployment to STAGING triggered."
         }
       }
@@ -174,14 +171,11 @@ pipeline {
         script {
           echo "Triggering infrastructure deployment for PRODUCTION with ${env.IMAGE_TAG} on ${env.BRANCH_NAME}..."
           
-          // Usar httpRequest en lugar de URL.openConnection
-          def response = httpRequest(
-            url: "${INFRA_JENKINS_URL}/job/${INFRA_JENKINS_JOB}/buildWithParameters?token=${JENKINS_TOKEN}&IMAGE_TAG=${env.IMAGE_TAG}&REGISTRY=${REGISTRY}&GIT_COMMIT=${env.GIT_COMMIT}&GIT_BRANCH=${env.BRANCH_NAME}&ENVIRONMENT=production",
-            httpMode: 'POST',
-            validResponseCodes: '200,201,202'
-          )
+          // Usar curl en lugar de httpRequest
+          sh """
+            curl -X POST "${INFRA_JENKINS_URL}/job/${INFRA_JENKINS_JOB}/buildWithParameters?token=${JENKINS_TOKEN}&IMAGE_TAG=${env.IMAGE_TAG}&REGISTRY=${REGISTRY}&GIT_COMMIT=${env.GIT_COMMIT}&GIT_BRANCH=${env.BRANCH_NAME}&ENVIRONMENT=production"
+          """
           
-          echo "Response status: ${response.status}"
           echo "Infrastructure deployment to PRODUCTION triggered."
         }
       }
