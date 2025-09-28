@@ -24,7 +24,7 @@ var (
 )
 
 func main() {
-	hostport := ":" + os.Getenv("APP_PORT")
+	hostport := ":" + os.Getenv("AUTH_API_PORT")
 	userAPIAddress := os.Getenv("USERS_API_ADDRESS")
 
 	envJwtSecret := os.Getenv("JWT_SECRET")
